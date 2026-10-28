@@ -1,0 +1,15 @@
+{
+  "dataset": "Alibaba GPU Cluster Trace 2026",
+  "source_url": "https://github.com/alibaba/clusterdata/tree/master/cluster-trace-gpu-v2026",
+  "download_date": "YYYY-MM-DD",
+  "tables_used": [
+    "asi_opensource_server_hourly",
+    "asi_opensource_pod_hourly"
+  ],
+  "relative_day_range": "",
+  "partition_hours": "",
+  "schema_snapshot_path": "",
+  "filters": "",
+  "code_commit": "",
+  "notes": "Record exact fields, filters, units, and assumptions. Do not record secrets."
+}

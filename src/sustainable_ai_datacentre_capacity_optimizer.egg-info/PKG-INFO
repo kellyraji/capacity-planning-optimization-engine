@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: sustainable-ai-datacentre-capacity-optimizer
+Version: 0.2.0
+Summary: Infrastructure and workload capacity optimization on public GPU cluster traces
+Requires-Python: >=3.10
+Requires-Dist: pandas>=2.2
+Requires-Dist: numpy>=1.26
+Requires-Dist: duckdb>=1.2
+Requires-Dist: pyarrow>=15
+Requires-Dist: matplotlib>=3.8
+Requires-Dist: pulp>=2.8

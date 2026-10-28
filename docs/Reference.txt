@@ -1,0 +1,6 @@
+@inproceedings{asi_trace_2026,
+  title = {Heterogeneity at Hyperscale: Characterization and Scheduling of Large Production AI Clusters at Alibaba},
+  author = {Suyi Li and Lingyun Yang and Haoxuan Yu and Sheng Yao and Tianyuan Wu and Xiaoxiao Jiang and Hanfeng Lu and Kangjin Wang and Chenhao Wang and Shenglin Xu and Lun Wang and Qingyang Duan and Shenghao Liang and Xiu Lin and Wenchao Wu and Yinghao Yu and Guodong Yang and Liping Zhang and Wei Wang},
+  booktitle = {20th USENIX Symposium on Operating Systems Design and Implementation (OSDI 26)},
+  year = {2026}
+}

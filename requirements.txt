@@ -1,0 +1,13 @@
+pandas>=2.2
+numpy>=1.26
+matplotlib>=3.8
+seaborn>=0.13
+scikit-learn>=1.4
+statsmodels>=0.14
+duckdb>=1.2
+pyarrow>=15
+pulp>=2.8
+pytest>=8
+jupyter>=1
+ipykernel>=6
+squarify>=0.4

@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sustainable-ai-datacentre-capacity-optimizer"
+version = "0.2.0"
+description = "Infrastructure and workload capacity optimization on public GPU cluster traces"
+requires-python = ">=3.10"
+dependencies = ["pandas>=2.2", "numpy>=1.26", "duckdb>=1.2", "pyarrow>=15", "matplotlib>=3.8", "pulp>=2.8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

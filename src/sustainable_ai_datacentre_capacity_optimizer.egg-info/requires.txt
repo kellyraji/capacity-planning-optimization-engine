@@ -1,0 +1,6 @@
+pandas>=2.2
+numpy>=1.26
+duckdb>=1.2
+pyarrow>=15
+matplotlib>=3.8
+pulp>=2.8

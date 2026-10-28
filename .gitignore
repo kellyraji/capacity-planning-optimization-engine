@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment and secrets
+.env
+.env.*
+
+# Local database and large datasets
+data/source.duckdb
+data/RAW/
+data/raw/
+data/RAW/**
+data/PROCESSED/**
+data/ANALYTICS/**
+
+# Generated outputs
+data/processed/
+outputs/figures/
+outputs/**
+logs/**
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+#others
+*.duckdb
+*.wal
+.env
+.DS_Store
+*.pyc
+.env
+.env.*
+!.env.example
+*.log
+EOF
