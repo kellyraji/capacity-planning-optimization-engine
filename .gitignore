@@ -1,38 +1,21 @@
-# Python
-__pycache__/
-*.py[cod]
+# DuckDB databases and associated files
+*.duckdb
+*.duckdb.wal
+*.db
+
+# Python virtual environments
 .venv/
 venv/
-
-# Environment and secrets
-.env
-.env.*
-
-# Local database and large datasets
-data/source.duckdb
-data/RAW/
-data/raw/
-data/RAW/**
-data/PROCESSED/**
-data/ANALYTICS/**
+__pycache__/
+*.py[cod]
 
 # Generated outputs
+outputs/
 data/processed/
-outputs/figures/
-outputs/**
-logs/**
 
-# Jupyter checkpoints
-.ipynb_checkpoints/
-
-#others
-*.duckdb
-*.wal
-.env
-.DS_Store
-*.pyc
+# Environment secrets
 .env
 .env.*
+
+# Keep example configuration files if needed
 !.env.example
-*.log
-EOF
