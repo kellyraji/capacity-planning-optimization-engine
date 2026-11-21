@@ -55,4 +55,4 @@ def forecast_next_period(hourly, seasonal_period=24, horizon=24):
             prediction = history.tail(seasonal_period).mean()
         values.append(max(float(prediction), 0.0))
 
-    return pd.DataFrame({"forecast_demand": values}, index=future_index)
+    return pd.DataFrame({"forecast_capacity": values}, index=future_index)
