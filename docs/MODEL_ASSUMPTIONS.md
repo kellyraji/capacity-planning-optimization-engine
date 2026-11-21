@@ -43,11 +43,11 @@ The objective minimises modelled CAPEX, cumulative OPEX and shortage penalty. It
 
 | Parameter | Current value |
 |---|---|
-| Deterministic demand multipliers | Scenario-specific: 1.00, 1.10, 1.25, 1.20 |
+| Deterministic required-capacity stress multipliers | Scenario-specific: 1.00, 1.10, 1.25, 1.20 |
 | Deterministic capacity factors | 1.00 and 0.85 |
 | Monte Carlo iterations | 5,000 |
 | Random seed | 42 |
-| Demand multiplier | Normal(1.0, 0.08), truncated at zero |
+| Required-capacity stress multiplier | Normal(1.0, 0.08), truncated at zero |
 | Capacity availability multiplier | Uniform(0.85, 1.0) |
 
 Outputs are conditional stress-test results, not calibrated operational risk forecasts.
