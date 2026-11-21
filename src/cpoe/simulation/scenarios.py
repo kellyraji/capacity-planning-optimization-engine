@@ -49,15 +49,15 @@ def run_scenario_simulation(
 
     scenarios = {
         "Base": (1.00, 1.00),
-        "High demand": (1.10, 1.00),
-        "Demand surge": (1.25, 1.00),
+        "Elevated requirement": (1.10, 1.00),
+        "Requirement surge": (1.25, 1.00),
         "Capacity outage": (1.00, 0.85),
         "Combined stress": (1.20, 0.85),
     }
 
     rows = []
-    for name, (demand_factor, capacity_factor) in scenarios.items():
-        stressed_required = required * demand_factor
+    for name, (requirement_factor, capacity_factor) in scenarios.items():
+        stressed_required = required * requirement_factor
         stressed_available = available * capacity_factor
         shortage = (stressed_required - stressed_available).clip(lower=0)
 
@@ -74,10 +74,10 @@ def run_scenario_simulation(
     deterministic.to_csv(output_dir / "scenario_results.csv", index=False)
 
     # Monte Carlo stress test. These are explicit illustrative assumptions:
-    # demand multiplier ~ N(1.0, 0.08), truncated at zero;
+    # required-capacity stress multiplier ~ N(1.0, 0.08), truncated at zero;
     # capacity availability is reduced by a random 0–15% outage.
     rng = np.random.default_rng(seed)
-    demand_factors = np.maximum(
+    requirement_factors = np.maximum(
         rng.normal(1.0, 0.08, size=simulations), 0
     )
     capacity_factors = rng.uniform(0.85, 1.0, size=simulations)
@@ -89,7 +89,7 @@ def run_scenario_simulation(
     available_values = available.to_numpy(dtype=float)
 
     for i in range(simulations):
-        stressed_required = required_values * demand_factors[i]
+        stressed_required = required_values * requirement_factors[i]
         stressed_available = available_values * capacity_factors[i]
         shortages = np.maximum(stressed_required - stressed_available, 0)
 
