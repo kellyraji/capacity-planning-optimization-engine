@@ -164,7 +164,7 @@ def run_forecast_pipeline(
     forecast_values = forecast_values.clip(lower=0)
 
     forecast = pd.DataFrame(
-        {"forecast_demand": forecast_values.to_numpy(dtype=float)},
+        {"forecast_capacity": forecast_values.to_numpy(dtype=float)},
         index=future_index,
     )
     forecast.index.name = "trace_timestamp"
@@ -182,7 +182,7 @@ def run_forecast_pipeline(
     )
 
     forecast["required_capacity"] = (
-        forecast["forecast_demand"] * planning_factor
+        forecast["forecast_capacity"] * planning_factor
     )
 
     baseline_capacity = float(series.iloc[-1])
@@ -208,13 +208,13 @@ def run_forecast_pipeline(
         processed_dir / "forecast_validation.csv",
         index=False,
     )
-    forecast.to_csv(processed_dir / "workload_forecast.csv")
+    forecast.to_csv(processed_dir / "capacity_forecast.csv")
 
     summary = pd.DataFrame([{
         "historical_hours": len(series),
         "historical_peak_capacity": float(series.max()),
         "historical_mean_capacity": float(series.mean()),
-        "forecast_peak_capacity": float(forecast["forecast_demand"].max()),
+        "forecast_peak_capacity": float(forecast["forecast_capacity"].max()),
         "peak_required_capacity": float(forecast["required_capacity"].max()),
         "baseline_capacity": baseline_capacity,
         "planning_factor": planning_factor,
