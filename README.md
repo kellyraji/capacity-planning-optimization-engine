@@ -14,9 +14,9 @@
 
 ## Project at a glance
 
-Capacity decisions are difficult when infrastructure is expensive, demand changes over time, and operational headroom matters. This project brings together data engineering, forecasting, industrial engineering and operations research in a transparent decision-support workflow.
+Capacity decisions are difficult when infrastructure is expensive, the observed footprint changes over time, and operational headroom matters. This project brings together data engineering, forecasting, industrial engineering and operations research in a transparent decision-support workflow.
 
-The current implementation uses the **Alibaba GPU Cluster Trace 2026** as a public case study. It builds an infrastructure baseline, creates an hourly capacity signal, evaluates a seasonal-naive forecast, translates the forecast into planning requirements, solves an integer server-addition model, and stress-tests the resulting plan.
+The current implementation uses the **Alibaba GPU Cluster Trace 2026** as a public case study. It builds an infrastructure baseline, creates an hourly capacity signal, evaluates a seasonal-naive forecast of the observed GPU capacity footprint, translates that forecast into planning requirements, solves an integer server-addition model, and stress-tests the resulting plan.
 
 > **Scope and honesty:** the implemented forecast targets observed GPU inventory/capacity, not workload demand or utilisation. Capacity factors, server capacity and cost coefficients used by the planning/optimisation model are assumptions that must be calibrated for a real operating environment. The repository does not claim realised cost, energy or carbon savings.
 
@@ -26,7 +26,7 @@ The current implementation uses the **Alibaba GPU Cluster Trace 2026** as a publ
 |---|---|---|
 | Data engineering | DuckDB + partitioned Parquet; schema and data-quality checks | Compact hourly infrastructure aggregates |
 | Capacity signal | Server-hour GPU/CPU inventory aggregation | Observed infrastructure footprint |
-| Forecasting | 24-hour seasonal-naive benchmark with chronological holdout | Forecast, validation MAE/RMSE and summary |
+| Forecasting | 24-hour seasonal-naive benchmark of observed GPU capacity with chronological holdout | Capacity forecast, validation MAE/RMSE and summary |
 | Capacity planning | Target utilisation, usable-capacity factor and safety buffer | Required capacity, headroom and risk flags |
 | Optimisation | Mixed-integer linear programming (PuLP/CBC) | Period-by-period server additions and modelled cost |
 | Risk analysis | Deterministic stress cases and seeded Monte Carlo simulation | Shortage exposure and percentile summaries |
@@ -38,7 +38,7 @@ flowchart TD
     A["Public GPU cluster trace<br/>Partitioned Parquet"] --> B["Data inspection & quality checks"]
     B --> C["DuckDB aggregation<br/>Infrastructure baseline"]
     C --> D["Hourly capacity signal"]
-    D --> E["Forecast & holdout validation"]
+    D --> E["Observed capacity forecast<br/>Holdout validation"]
     E --> F["Capacity requirements<br/>Headroom / risk flags"]
     F --> G["MILP server expansion model"]
     G --> H["Deterministic scenarios"]
@@ -47,6 +47,10 @@ flowchart TD
     I --> J
     J --> K["Review assumptions & operational trade-offs"]
 ```
+
+## Terminology and architecture decisions
+
+Use the [project glossary](docs/GLOSSARY.md) for consistent definitions of the capacity signal, forecast target, headroom, planning assumptions and optimisation terms. The [architecture decision record](docs/ADR-001-ANALYTICAL-STACK.md) explains the rationale and trade-offs behind the Python, DuckDB, Parquet and MILP stack.
 
 ## Repository structure
 
@@ -58,6 +62,8 @@ flowchart TD
 │   ├── POD_DATASET_PLAYBOOK.md
 │   ├── DATA_DICTIONARY_TEMPLATE.md
 │   ├── MODEL_ASSUMPTIONS.md
+│   ├── GLOSSARY.md
+│   ├── ADR-001-ANALYTICAL-STACK.md
 │   ├── VALIDATION_AND_LIMITATIONS.md
 │   └── RUN_MANIFEST_TEMPLATE.json
 ├── notebooks/                 # Staged analytical walkthrough
@@ -146,7 +152,7 @@ pytest
 python -m cpoe.run_pipeline
 ```
 
-The pipeline writes reproducible CSV outputs under `data/processed/` (ignored by Git), including forecast validation, capacity requirements, optimisation solution, deterministic scenarios and Monte Carlo risk summary.
+The pipeline writes reproducible CSV outputs under `data/processed/` (ignored by Git), including `capacity_forecast.csv`, forecast validation, capacity requirements, the optimisation solution, deterministic scenarios and the Monte Carlo risk summary.
 
 ## Model assumptions
 
@@ -160,7 +166,7 @@ The project intentionally exposes key assumptions instead of presenting them as 
 - Illustrative server CAPEX: 1,000,000 cost units.
 - Illustrative per-period OPEX: 1,000 cost units.
 - Illustrative shortage penalty: 10,000,000 cost units.
-- Monte Carlo demand multiplier: Normal(1.0, 0.08), truncated at zero.
+- Monte Carlo required-capacity stress multiplier: Normal(1.0, 0.08), truncated at zero.
 - Monte Carlo capacity-availability multiplier: Uniform(0.85, 1.0).
 
 These are model inputs for sensitivity analysis, **not supplier quotations, observed costs, service-level commitments or empirically estimated distributions**. See [MODEL_ASSUMPTIONS.md](docs/MODEL_ASSUMPTIONS.md).
@@ -171,7 +177,7 @@ These are model inputs for sensitivity analysis, **not supplier quotations, obse
 - Server inventory is an observed footprint, not proof every GPU is operational, schedulable or available.
 - The implemented forecast is of observed capacity/inventory. It is not a demand or utilisation forecast.
 - Resource requests and utilisation are not equivalent to electrical power draw.
-- A shortage probability from Monte Carlo is conditional on the specified model and assumptions; it is not a measured failure probability.
+- A shortage probability from Monte Carlo is conditional on the specified required-capacity stress and capacity-availability assumptions; it is not a measured failure probability.
 - No actual business savings, energy savings or carbon reductions are claimed.
 - Do not add raw datasets, large derived files, credentials or employer-confidential information to this repository.
 
