@@ -65,6 +65,7 @@ Use the [project glossary](docs/GLOSSARY.md) for consistent definitions of the c
 │   ├── GLOSSARY.md
 │   ├── ADR-001-ANALYTICAL-STACK.md
 │   ├── VALIDATION_AND_LIMITATIONS.md
+│   ├── LINKEDIN_SHOWCASE.md
 │   └── RUN_MANIFEST_TEMPLATE.json
 ├── notebooks/                 # Staged analytical walkthrough
 ├── scripts/                   # Parquet inspection and DuckDB aggregation
