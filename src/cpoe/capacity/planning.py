@@ -29,12 +29,12 @@ def calculate_capacity_requirements(forecast, history, params=None):
     )
 
     result = forecast.copy()
-    result["required_capacity"] = result["forecast_demand"] * planning_factor
+    result["required_capacity"] = result["forecast_capacity"] * planning_factor
     result["baseline_capacity"] = baseline
     result["headroom"] = result["baseline_capacity"] - result["required_capacity"]
     result["additional_capacity"] = result["required_capacity"] - result["baseline_capacity"]
     result["planning_utilization"] = (
-        result["forecast_demand"] / result["baseline_capacity"]
+        result["forecast_capacity"] / result["baseline_capacity"]
     )
 
     result["additional_servers"] = np.ceil(
@@ -52,7 +52,7 @@ def calculate_capacity_requirements(forecast, history, params=None):
     )
 
     summary = pd.Series({
-        "peak_forecast_demand": result["forecast_demand"].max(),
+        "peak_forecast_capacity": result["forecast_capacity"].max(),
         "peak_required_capacity": result["required_capacity"].max(),
         "minimum_headroom": result["headroom"].min(),
         "hours_negative_headroom": int((result["headroom"] < 0).sum()),
