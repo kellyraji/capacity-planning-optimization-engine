@@ -34,7 +34,7 @@ The workflow brings together:
 
 🧮 **Optimisation:** a mixed-integer linear programming model to evaluate staged server additions against modelled costs and shortage penalties.
 
-🎯 **Risk analysis:** deterministic stress cases and Monte Carlo simulation to explore how demand variation and capacity availability affect the plan.
+🎯 **Risk analysis:** deterministic stress cases and Monte Carlo simulation to explore how required-capacity variation and assumed capacity availability affect the plan.
 
 What matters most is connecting analytical output to operational decisions: understanding what the model assumes, where constraints may emerge, and how sensitive a proposed plan is to uncertainty.
 
