@@ -15,7 +15,7 @@ The repository contains unit tests for capacity scaling, hourly data validation 
 - [ ] Test join cardinality before joining pod and server tables.
 
 ### Forecasting
-- [ ] State that the current target is observed GPU inventory/capacity.
+- [ ] State that the current target is observed GPU capacity footprint; use `forecast_capacity` and `capacity_forecast.csv` consistently.
 - [ ] Compare persistence and seasonal-naive benchmarks.
 - [ ] Use chronological holdout and add rolling-origin backtesting.
 - [ ] Report MAE/RMSE with units and validation interval.
@@ -32,7 +32,7 @@ The repository contains unit tests for capacity scaling, hourly data validation 
 - [ ] Document rationale for each random input distribution.
 - [ ] Run sensitivity analysis across plausible parameter ranges.
 - [ ] Report uncertainty bands and seed.
-- [ ] Label shortage probabilities as conditional model outputs.
+- [ ] Label required-capacity stress multipliers and shortage probabilities as conditional model outputs, not measured workload-demand or failure probabilities.
 
 ## Known limitations
 
