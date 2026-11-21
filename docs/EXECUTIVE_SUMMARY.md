@@ -1,35 +1,43 @@
-# Executive summary — Sustainable AI Data Centre Capacity Optimizer
+# Executive summary — Capacity Planning & Optimisation Engine
 
 ## Purpose
 
-This project develops a data-driven framework for understanding observed AI data-centre infrastructure, characterizing GPU workload demand, and evaluating capacity decisions under operational uncertainty. It applies industrial engineering, forecasting, optimization, scenario analysis and data engineering to a public GPU trace.
+This project demonstrates an industrial-engineering decision-support workflow for infrastructure capacity baselining, short-horizon forecasting, capacity planning, constrained expansion and operational risk analysis. It uses the public Alibaba GPU Cluster Trace 2026 as a case study and keeps assumptions, transformations and limitations explicit.
 
 ## Decision problem
 
-AI infrastructure operators must balance service-level needs and workload growth against constrained GPU capacity, operational risk and the cost and environmental implications of running infrastructure. Poorly matched requests, placement and capacity decisions can contribute to underused resources or avoidable expansion, but utilization alone does not establish energy waste.
+Infrastructure planners need to understand the observed capacity footprint, translate a forecast into a planning requirement, and evaluate expansion choices under financial and operational constraints. The central question is how to turn a measured infrastructure baseline and an explicit set of planning assumptions into a defensible capacity plan.
 
-## Method
+## Current analytical workflow
 
-**Layer 1 — Infrastructure baseline:** use the server-hourly table to measure observed GPU/CPU footprint, inventory dynamics, cluster/model concentration and hypothetical outage exposure.
+1. **Data engineering:** inspect and validate server-hourly Parquet data, then use DuckDB to aggregate a trace-relative hourly infrastructure baseline.
+2. **Capacity signal:** calculate observed GPU capacity as the aggregate GPU inventory recorded across observed servers at each hour.
+3. **Forecasting:** apply a 24-hour seasonal-naive benchmark to the observed GPU capacity footprint and evaluate it on a chronological holdout using MAE and RMSE.
+4. **Capacity planning:** convert forecast capacity into required planning capacity using an explicit target-utilisation assumption, usable-capacity factor and safety buffer; calculate headroom and risk flags.
+5. **Optimisation:** use a mixed-integer linear programming model to evaluate staged server additions against illustrative CAPEX, OPEX and shortage-penalty coefficients.
+6. **Risk analysis:** stress-test the required-capacity plan under deterministic cases and seeded Monte Carlo variation in required capacity and capacity availability.
 
-**Layer 2 — Workload analysis:** use the pod-hourly table to analyze resource requests, reported utilization and scheduling delays where available. Aggregate at a validated server-hour grain before joining infrastructure inventory.
+## Planned analytical extensions
 
-**Decision layer:** forecast a clearly defined target, compare capacity plans under transparent constraints, and evaluate baseline/stress scenarios. Use a naive benchmark and chronological holdout for forecast validation.
+- **Workload layer:** use validated pod-hourly fields to analyse resource requests, reported utilisation and scheduling delays. These are distinct measures and must not be conflated with observed server inventory.
+- **Forecast improvement:** compare the current seasonal-naive benchmark with persistence and other candidates using rolling-origin backtesting; add a separate workload-demand forecast only when a defensible demand signal is defined.
+- **Operational constraints:** incorporate resource compatibility, lead times, expansion limits, workload priority and other constraints where source data supports them.
+- **Energy analysis:** introduce measured power or a transparent calibrated power model and carbon-intensity factors before estimating energy or emissions.
 
-**Sustainability layer:** quantify energy/carbon only when measured power or a transparent, calibrated power model and carbon-intensity assumptions are available. Separate measured results from estimates.
+## Current outputs
 
-## Expected outputs
+- Hourly observed infrastructure capacity footprint.
+- Forecast-capacity series and chronological holdout metrics.
+- Capacity requirements, headroom and planning risk flags.
+- Modelled server additions, availability, shortage and cost components.
+- Deterministic scenario and Monte Carlo stress-test summaries.
 
-- Reproducible data-quality and schema report.
-- Infrastructure capacity baseline and time-series summaries.
-- Workload/request-use aggregates and scheduling indicators.
-- Forecast validation results, capacity scenarios and optimization outputs.
-- Sustainability sensitivity analysis with explicit assumptions and limitations.
+## Status and limitations
 
-## Current status and limitations
+The repository does not include the large source archives. The complete workflow must be executed and validated against the downloaded trace release before publishing numerical findings. Relative `day` and `hour` partitions represent trace time, not calendar dates. Server inventory is not proof that every GPU is operational, schedulable or available. The current forecast is of observed GPU capacity—not workload demand or GPU utilisation.
 
-This repository is a project scaffold and analytical implementation pack. It does not include the large Alibaba source archives, and the full pipeline must be run and validated against the downloaded release before any numeric findings are reported. Relative `day` and `hour` partitions are trace time, not calendar dates. Server inventory is not proof of operational availability; workload utilization is not power consumption.
+Planning factors, server capacity, financial coefficients and stress-test distributions are illustrative. Simulated shortage is conditional on those assumptions and is not a measured failure probability. No realised cost savings, energy savings or carbon reductions are claimed.
 
 ## Professional relevance
 
-The project demonstrates industrial engineering and data analytics through capacity planning, workload characterization, optimization, risk analysis and decision support. It is designed to be auditable and publicly reproducible without using proprietary employer data.
+The project brings together industrial engineering, capacity planning, data analytics and operations research. Its emphasis is on traceable assumptions, analytical validation and translating quantitative signals into structured operational decisions, using public data rather than proprietary employer information.
