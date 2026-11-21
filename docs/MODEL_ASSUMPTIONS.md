@@ -48,7 +48,7 @@ The objective minimises modelled CAPEX, cumulative OPEX and shortage penalty. It
 | Monte Carlo iterations | 5,000 |
 | Random seed | 42 |
 | Required-capacity stress multiplier | Normal(1.0, 0.08), truncated at zero |
-| Capacity availability multiplier | Uniform(0.85, 1.0) |
+| Capacity-availability factor | Uniform(0.85, 1.0) |
 
 Outputs are conditional stress-test results, not calibrated operational risk forecasts.
 
