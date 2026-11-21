@@ -1,53 +1,205 @@
-# Sustainable AI Data Centre Capacity Optimizer (CPOE)
+# Capacity Planning & Optimisation Engine
 
-A portfolio project for data-centre infrastructure baselining, workload characterization, capacity planning, optimization, scenario risk, and carefully bounded sustainability analysis using Alibaba GPU Cluster Trace 2026.
+<p align="center">
+  <strong>A reproducible industrial-engineering analytics project for infrastructure capacity forecasting, constrained expansion planning, and operational risk simulation.</strong>
+</p>
 
-## Data strategy
+<p align="center">
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white">
+  <img alt="DuckDB" src="https://img.shields.io/badge/Analytics-DuckDB-FFF000?logo=duckdb&logoColor=black">
+  <img alt="Optimisation" src="https://img.shields.io/badge/Optimisation-MILP-6A5ACD">
+  <img alt="Testing" src="https://img.shields.io/badge/Tests-pytest-0A9EDC?logo=pytest&logoColor=white">
+  <img alt="Data" src="https://img.shields.io/badge/Data-Public%20GPU%20Cluster%20Trace-2E8B57">
+</p>
 
-- **Layer 1 — infrastructure baseline:** `asi_opensource_server_hourly` (about 3.1 GB compressed according to the release download guide).
-- **Layer 2 — workload and resource-use analysis:** `asi_opensource_pod_hourly` (about 352 GB compressed). This is the main analytical dataset for workload demand/utilization; process it with DuckDB over partitioned Parquet, not pandas `read_parquet` of the entire archive.
-- Optional later: job execution summary and network hourly tables.
+## Project at a glance
 
-Official references:
-- Dataset: https://github.com/alibaba/clusterdata/tree/master/cluster-trace-gpu-v2026
-- Schema: https://github.com/alibaba/clusterdata/blob/master/cluster-trace-gpu-v2026/docs/schema.md
-- Download guide: https://github.com/alibaba/clusterdata/blob/master/cluster-trace-gpu-v2026/docs/data_download.md
+Capacity decisions are difficult when infrastructure is expensive, demand changes over time, and operational headroom matters. This project brings together data engineering, forecasting, industrial engineering and operations research in a transparent decision-support workflow.
+
+The current implementation uses the **Alibaba GPU Cluster Trace 2026** as a public case study. It builds an infrastructure baseline, creates an hourly capacity signal, evaluates a seasonal-naive forecast, translates the forecast into planning requirements, solves an integer server-addition model, and stress-tests the resulting plan.
+
+> **Scope and honesty:** the implemented forecast targets observed GPU inventory/capacity, not workload demand or utilisation. Capacity factors, server capacity and cost coefficients used by the planning/optimisation model are assumptions that must be calibrated for a real operating environment. The repository does not claim realised cost, energy or carbon savings.
+
+## What the engine does
+
+| Workstream | Approach | Decision-support output |
+|---|---|---|
+| Data engineering | DuckDB + partitioned Parquet; schema and data-quality checks | Compact hourly infrastructure aggregates |
+| Capacity signal | Server-hour GPU/CPU inventory aggregation | Observed infrastructure footprint |
+| Forecasting | 24-hour seasonal-naive benchmark with chronological holdout | Forecast, validation MAE/RMSE and summary |
+| Capacity planning | Target utilisation, usable-capacity factor and safety buffer | Required capacity, headroom and risk flags |
+| Optimisation | Mixed-integer linear programming (PuLP/CBC) | Period-by-period server additions and modelled cost |
+| Risk analysis | Deterministic stress cases and seeded Monte Carlo simulation | Shortage exposure and percentile summaries |
+
+## Architecture
+
+```mermaid
+flowchart TD
+    A["Public GPU cluster trace<br/>Partitioned Parquet"] --> B["Data inspection & quality checks"]
+    B --> C["DuckDB aggregation<br/>Infrastructure baseline"]
+    C --> D["Hourly capacity signal"]
+    D --> E["Forecast & holdout validation"]
+    E --> F["Capacity requirements<br/>Headroom / risk flags"]
+    F --> G["MILP server expansion model"]
+    G --> H["Deterministic scenarios"]
+    G --> I["Monte Carlo stress test"]
+    H --> J["Decision-support outputs"]
+    I --> J
+    J --> K["Review assumptions & operational trade-offs"]
+```
+
+## Repository structure
+
+```text
+.
+├── docs/
+│   ├── EXECUTIVE_SUMMARY.md
+│   ├── LAYER1_LAYER2_ANALYTICAL_PLAN.md
+│   ├── POD_DATASET_PLAYBOOK.md
+│   ├── DATA_DICTIONARY_TEMPLATE.md
+│   ├── MODEL_ASSUMPTIONS.md
+│   ├── VALIDATION_AND_LIMITATIONS.md
+│   └── RUN_MANIFEST_TEMPLATE.json
+├── notebooks/                 # Staged analytical walkthrough
+├── scripts/                   # Parquet inspection and DuckDB aggregation
+├── sql/                       # Data-quality and exploratory SQL
+├── src/cpoe/
+│   ├── capacity/               # Capacity requirements and risk flags
+│   ├── data/                   # Loading and validation
+│   ├── forecasting/            # Forecast pipeline and models
+│   ├── optimization/           # MILP capacity expansion
+│   ├── simulation/             # Deterministic and Monte Carlo scenarios
+│   └── run_pipeline.py         # End-to-end orchestration
+├── tests/
+├── pyproject.toml
+└── requirements.txt
+```
 
 ## Quick start
 
-1. Create and activate a virtual environment.
-2. Install dependencies: `python -m pip install -r requirements.txt`.
-3. Download/extract the server archive first. Keep original partitions under `data/RAW/asi_opensource_server_hourly/` (partition folders such as `day=.../hour=.../part-*.parquet`).
-4. Run `python scripts/inspect_parquet_dataset.py --path "data/RAW/asi_opensource_server_hourly/**/*.parquet"` to inspect actual fields and types.
-5. Run `python scripts/build_layer1_server_baseline.py` to create hourly infrastructure and cluster-level aggregates.
-6. Before downloading the pod archive, review `docs/POD_DATASET_PLAYBOOK.md`. The pod archive is very large; start with a bounded pilot (a few days/hours), then scale by partition.
-7. Set `POD_PARQUET_GLOB` to the extracted pod partitions and run `python scripts/build_layer2_pod_aggregates.py`. The script first inspects schema and fails with a clear message if expected fields differ; validate fields against the official schema.
+### 1. Create an environment
 
-## Data and interpretation guardrails
+Python 3.10 or newer is required. A clean virtual environment is recommended.
 
-- `day`/`hour` are relative trace partitions, not real calendar timestamps.
-- A server row is an observed inventory record, not proof every GPU is operational or available for allocation.
-- Server inventory alone cannot measure utilization, idle GPUs, workload demand, electricity use, or carbon emissions.
-- Pod-level resource requests and reported utilization are not the same as power draw. Estimate energy only with documented power assumptions or real measurements; report estimates as estimates.
-- Do not claim realized energy/carbon savings from this trace without power data and a defensible counterfactual.
-- Do not commit raw data, large derived data, or credentials to GitHub.
+**macOS / Linux**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+```
 
-## Project layers
+**Windows PowerShell**
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+```
 
-1. `docs/LAYER1_LAYER2_ANALYTICAL_PLAN.md` — research questions, metrics, limitations, and acceptance criteria.
-2. `scripts/` — schema inspection and memory-conscious DuckDB aggregation.
-3. `sql/` — example exploratory queries.
-4. `notebooks/` — staged narrative analysis. Run top-to-bottom and validate generated artifacts before publishing.
-5. `docs/EXECUTIVE_SUMMARY.md` — portfolio narrative; update with actual results only after running the analysis.
+### 2. Obtain and inspect the data
 
-## Suggested machine setup
+The project uses the public [Alibaba GPU Cluster Trace 2026](https://github.com/alibaba/clusterdata/tree/master/cluster-trace-gpu-v2026). Read the official [schema](https://github.com/alibaba/clusterdata/blob/master/cluster-trace-gpu-v2026/docs/schema.md) and [download guide](https://github.com/alibaba/clusterdata/blob/master/cluster-trace-gpu-v2026/docs/data_download.md) before processing.
 
-A local DuckDB database is the recommended starting point. It is a file-based analytical database and can query Parquet directly, scanning only required columns/partitions. Do not provision a hosted cloud database initially. Consider cloud object storage + a managed query engine only if local disk, RAM, or collaboration needs justify the cost and operational overhead.
+Start with the server-hourly dataset. Keep raw partitions outside version control, under:
 
-## Reference
-@inproceedings{asi_trace_2026,
-  title = {Heterogeneity at Hyperscale: Characterization and Scheduling of Large Production AI Clusters at Alibaba},
-  author = {Suyi Li and Lingyun Yang and Haoxuan Yu and Sheng Yao and Tianyuan Wu and Xiaoxiao Jiang and Hanfeng Lu and Kangjin Wang and Chenhao Wang and Shenglin Xu and Lun Wang and Qingyang Duan and Shenghao Liang and Xiu Lin and Wenchao Wu and Yinghao Yu and Guodong Yang and Liping Zhang and Wei Wang},
-  booktitle = {20th USENIX Symposium on Operating Systems Design and Implementation (OSDI 26)},
-  year = {2026}
-}
+```text
+data/RAW/asi_opensource_server_hourly/
+```
+
+Inspect the actual fields before aggregation:
+
+```bash
+python scripts/inspect_parquet_dataset.py --path "data/RAW/asi_opensource_server_hourly/**/*.parquet"
+```
+
+The Layer 1 aggregation script uses DuckDB and a configurable Parquet glob:
+
+**macOS / Linux**
+```bash
+export SERVER_PARQUET_GLOB="data/RAW/asi_opensource_server_hourly/**/*.parquet"
+python scripts/build_layer1_server_baseline.py
+```
+
+**Windows PowerShell**
+```powershell
+$env:SERVER_PARQUET_GLOB = "data/RAW/asi_opensource_server_hourly/**/*.parquet"
+python scripts/build_layer1_server_baseline.py
+```
+
+The pod-hourly archive is very large (the release guide has listed approximately 352 GB compressed). Review [the staged processing playbook](docs/POD_DATASET_PLAYBOOK.md), check local disk capacity, and pilot a narrow partition range before scaling. Do not download or process the full archive by default.
+
+### 3. Configure the engine input
+
+The current Python pipeline reads a local DuckDB database at `data/source.duckdb` and expects a table/view named `asi_opensource_server_hourly`. Create that database/view from the validated source data or adapt `src/cpoe/config.py` and the loader to your chosen location.
+
+Run the environment check:
+
+```bash
+python scripts/check_environment.py
+```
+
+### 4. Run tests and the pipeline
+
+```bash
+pytest
+python -m cpoe.run_pipeline
+```
+
+The pipeline writes reproducible CSV outputs under `data/processed/` (ignored by Git), including forecast validation, capacity requirements, optimisation solution, deterministic scenarios and Monte Carlo risk summary.
+
+## Model assumptions
+
+The project intentionally exposes key assumptions instead of presenting them as measured facts. Current examples include:
+
+- Target utilisation: 70%.
+- Usable capacity factor: 90%.
+- Safety buffer: 10%.
+- GPUs per new server: 8.
+- Optimisation server capacity: 8 capacity units per server.
+- Illustrative server CAPEX: 1,000,000 cost units.
+- Illustrative per-period OPEX: 1,000 cost units.
+- Illustrative shortage penalty: 10,000,000 cost units.
+- Monte Carlo demand multiplier: Normal(1.0, 0.08), truncated at zero.
+- Monte Carlo capacity-availability multiplier: Uniform(0.85, 1.0).
+
+These are model inputs for sensitivity analysis, **not supplier quotations, observed costs, service-level commitments or empirically estimated distributions**. See [MODEL_ASSUMPTIONS.md](docs/MODEL_ASSUMPTIONS.md).
+
+## Interpretation guardrails
+
+- `day` and `hour` are relative trace partitions, not real calendar timestamps.
+- Server inventory is an observed footprint, not proof every GPU is operational, schedulable or available.
+- The implemented forecast is of observed capacity/inventory. It is not a demand or utilisation forecast.
+- Resource requests and utilisation are not equivalent to electrical power draw.
+- A shortage probability from Monte Carlo is conditional on the specified model and assumptions; it is not a measured failure probability.
+- No actual business savings, energy savings or carbon reductions are claimed.
+- Do not add raw datasets, large derived files, credentials or employer-confidential information to this repository.
+
+## Roadmap
+
+- [ ] Add a reproducible, small synthetic fixture so the end-to-end pipeline can be run without the large source trace.
+- [ ] Separate inventory forecasting from true workload-demand forecasting.
+- [ ] Compare forecasts against persistence and seasonal-naive baselines on rolling chronological holdouts.
+- [ ] Add GPU-model compatibility and workload priority constraints to optimisation where source fields support them.
+- [ ] Add parameterised sensitivity analysis for CAPEX, OPEX, capacity and shortage penalties.
+- [ ] Add CI for tests, linting and notebook validation.
+- [ ] Publish charts and a run manifest generated from an executed, validated run.
+- [ ] Add energy analysis only after introducing defensible measured or calibrated power inputs.
+
+## Why this project matters
+
+The aim is not to produce a forecast in isolation. It is to connect data quality, capacity signals, operational buffers, constrained investment decisions and uncertainty into a workflow that helps explain **what capacity may be required, when expansion could be needed, and how sensitive that decision is to assumptions**.
+
+## Author
+
+**Nnabundom “Kelly” Raji, PMP, MSc**  
+Industrial Engineering | Strategic Capacity Planning | Data Analytics
+
+[GitHub profile](https://github.com/kellyraji) · [Repository](https://github.com/kellyraji/capacity-planning-optimization-engine)
+
+## References
+
+- [Alibaba GPU Cluster Trace 2026](https://github.com/alibaba/clusterdata/tree/master/cluster-trace-gpu-v2026)
+- [Official trace schema](https://github.com/alibaba/clusterdata/blob/master/cluster-trace-gpu-v2026/docs/schema.md)
+- [DuckDB Parquet documentation](https://duckdb.org/docs/current/data/parquet/overview)
+- [PuLP documentation](https://coin-or.github.io/pulp/)
