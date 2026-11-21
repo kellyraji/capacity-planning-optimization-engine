@@ -168,7 +168,7 @@ The project intentionally exposes key assumptions instead of presenting them as 
 - Illustrative per-period OPEX: 1,000 cost units.
 - Illustrative shortage penalty: 10,000,000 cost units.
 - Monte Carlo required-capacity stress multiplier: Normal(1.0, 0.08), truncated at zero.
-- Monte Carlo capacity-availability multiplier: Uniform(0.85, 1.0).
+- Monte Carlo capacity-availability factor: Uniform(0.85, 1.0).
 
 These are model inputs for sensitivity analysis, **not supplier quotations, observed costs, service-level commitments or empirically estimated distributions**. See [MODEL_ASSUMPTIONS.md](docs/MODEL_ASSUMPTIONS.md).
 
