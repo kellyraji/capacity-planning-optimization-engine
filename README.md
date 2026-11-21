@@ -50,7 +50,7 @@ flowchart TD
 
 ## Terminology and architecture decisions
 
-Use the [project glossary](docs/GLOSSARY.md) for consistent definitions of the capacity signal, forecast target, headroom, planning assumptions and optimisation terms. The [architecture decision record](docs/ADR-001-ANALYTICAL-STACK.md) explains the rationale and trade-offs behind the Python, DuckDB, Parquet and MILP stack.
+Use the [project glossary](docs/GLOSSARY.md) for consistent definitions of the capacity signal, forecast target, headroom, planning assumptions and optimisation terms. The [architecture decision record](docs/ADR-001-ANALYTICAL-STACK.md) explains the rationale and trade-offs behind the Python, DuckDB, Parquet and MILP stack. The [LinkedIn showcase pack](docs/LINKEDIN_SHOWCASE.md) contains the project summary and a ready-to-adapt post draft.
 
 ## Repository structure
 
